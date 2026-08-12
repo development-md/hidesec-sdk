@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hidesec — Executive Teaser</title>
+<style>
+  :root{
+    --ink:#111827; --muted:#4b5563; --faint:#6b7280;
+    --navy:#0b2e59; --navy2:#123f77; --accent:#1f6feb;
+    --line:#e5e7eb; --soft:#f4f6f9; --softer:#fafbfc;
+    --good:#0f7a4d; --goodbg:#e7f4ee; --bad:#9b1c1c; --badbg:#fbe9e9;
+  }
+  @page{size:letter; margin:0;}
+  *{box-sizing:border-box;}
+  html{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:var(--ink); font-size:9.6pt; line-height:1.42; margin:0;}
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif; color:var(--navy); line-height:1.15; margin:0;}
+  .band{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,#17518f 100%); color:#fff; padding:26px 40px 22px;}
+  .band .brand{letter-spacing:.26em; font-size:8.5pt; text-transform:uppercase; opacity:.85; margin-bottom:10px;}
+  .band h1{color:#fff; font-size:23pt;}
+  .band .sub{font-size:11pt; opacity:.93; margin-top:7px; max-width:88%;}
+  .wrap{padding:20px 40px 0;}
+  .kick{font-size:8pt; text-transform:uppercase; letter-spacing:.1em; color:var(--accent); font-weight:700; margin:0 0 3px;}
+  h2{font-size:13pt; margin:0 0 6px;}
+  h3{font-size:10pt; color:var(--navy2); margin:0 0 3px;}
+  p{margin:0 0 7px;}
+  .cols{display:flex; gap:16px;}
+  .cols>div{flex:1;}
+  .card{border:1px solid var(--line); border-radius:8px; padding:12px 14px; background:var(--softer); height:100%;}
+  .card.bad{border-color:#f1c9c9; background:var(--badbg);}
+  .card.good{border-color:#bfe3d0; background:var(--goodbg);}
+  .card .lbl{font-size:7.5pt; text-transform:uppercase; letter-spacing:.07em; font-weight:700; margin-bottom:4px;}
+  .card.bad .lbl{color:var(--bad);} .card.good .lbl{color:var(--good);}
+  .metrics{display:flex; gap:12px; margin:16px 0 4px;}
+  .metrics .m{flex:1; text-align:center; border:1px solid var(--line); border-radius:8px; padding:11px 8px; background:#fff;}
+  .metrics .m .n{font-family:Georgia,serif; font-size:16pt; color:var(--navy); font-weight:700;}
+  .metrics .m .l{font-size:7.6pt; color:var(--muted); margin-top:2px; line-height:1.3;}
+  .stack .row{display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:6px; margin-bottom:5px; font-size:8.8pt;}
+  .stack .row .t{font-weight:700; color:var(--navy); width:210px;}
+  .stack .row .d{color:var(--muted); font-size:8.3pt;}
+  .stack .row .role{margin-left:auto; font-size:7pt; text-transform:uppercase; letter-spacing:.05em; font-weight:700; padding:2px 7px; border-radius:10px; white-space:nowrap;}
+  .l4{background:#eaf1fb;} .l4 .role{background:#d6e4fb; color:var(--navy2);}
+  .l3{background:#eaf4ef;} .l3 .role{background:#d3ecdd; color:var(--good);}
+  .l2{background:#eef2f7;} .l2 .role{background:#dde6f0; color:var(--navy2);}
+  .l1{background:#faf3e6;} .l1 .role{background:#f2e2c4; color:#9a5b00;}
+  .foot{position:fixed; bottom:0; left:0; right:0; padding:8px 40px; border-top:1px solid var(--line); color:var(--faint); font-size:7.4pt; display:flex; justify-content:space-between;}
+  ul{margin:2px 0 0; padding-left:15px;} li{margin-bottom:2px;}
+  .pill{display:inline-block; border:1px solid rgba(255,255,255,.4); border-radius:14px; padding:3px 10px; font-size:7.6pt; margin-right:5px;}
+</style>
+</head>
+<body>
+  <div class="band">
+    <div class="brand">Hidesec SDK &nbsp;·&nbsp; Mobile Application Security</div>
+    <h1>Stop API abuse from tampered mobile apps</h1>
+    <div class="sub">Runtime attestation + request-bound signing, delivered as a two-line SDK integration with a bundled server-side verifier. Built for banking security review.</div>
+    <div style="margin-top:12px;">
+      <span class="pill">Runtime Attestation</span>
+      <span class="pill">Request Signing</span>
+      <span class="pill">Gradle + OkHttp</span>
+      <span class="pill">OWASP MASVS</span>
+      <span class="pill">PSD2 · PCI</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="kick">The 30-second version</div>
+    <h2>Assume the API is public. Make abuse non-actionable.</h2>
+    <p>Static analysis of any banking APK exposes every endpoint, schema, and embedded key — this
+    cannot be fixed by hiding. We don't try to. We move trust to your server: the app proves its
+    integrity, receives only short-lived request-bound credentials, and your backend rejects
+    everything else. A captured request cannot be replayed or forged at scale.</p>
+
+    <div class="cols" style="margin:10px 0 4px;">
+      <div><div class="card bad">
+        <div class="lbl">What we deliberately do NOT sell</div>
+        "Invisible" or "un-reverse-engineerable" APIs. That claim is false on mobile and fails a
+        bank security review. OWASP: it is <em>impossible to prevent static analysis</em>.
+      </div></div>
+      <div><div class="card good">
+        <div class="lbl">What we sell — and can defend</div>
+        A leaked endpoint or key is <strong>useless to anything but your genuine, unmodified app.</strong>
+        Same architecture banks already accept under PSD2 &amp; PCI. Candor passes due diligence.
+      </div></div>
+    </div>
+
+    <div class="metrics">
+      <div class="m"><div class="n">&lt;1 ms</div><div class="l">added latency per request</div></div>
+      <div class="m"><div class="n">2 lines</div><div class="l">to integrate (plugin + client)</div></div>
+      <div class="m"><div class="n">Fail-closed</div><div class="l">no valid attestation → rejected</div></div>
+      <div class="m"><div class="n">Bundled</div><div class="l">server verifier included</div></div>
+    </div>
+
+    <div class="kick" style="margin-top:14px;">Layered defense</div>
+    <div class="stack">
+      <div class="row l4"><span class="t">Server enforcement</span><span class="d">authN/Z · short-lived revocable tokens · rate limits · anomaly detection</span><span class="role">Durable control</span></div>
+      <div class="row l3"><span class="t">Attestation (server-verified)</span><span class="d">Play Integrity / challenge-response → risk scoring · blocks repackaged apps, emulators, bots</span><span class="role">Security control</span></div>
+      <div class="row l2"><span class="t">Cryptographic (client→server)</span><span class="d">per-request signature bound to body + nonce · JIT secrets · dynamic pinning</span><span class="role">Security control</span></div>
+      <div class="row l1"><span class="t">Obfuscation (client)</span><span class="d">endpoint-table + NDK string encryption · deters commodity static analysis</span><span class="role">Friction only</span></div>
+    </div>
+
+    <div class="cols" style="margin-top:14px;">
+      <div>
+        <h3>Why banks buy this</h3>
+        <ul>
+          <li>Maps to controls a PCI QSA / PSD2 auditor already verifies</li>
+          <li>No secret ships in the binary — central rotation, no app release</li>
+          <li>Honest threat model survives technical due diligence</li>
+        </ul>
+      </div>
+      <div>
+        <h3>What you integrate</h3>
+        <ul>
+          <li>One Gradle plugin + one OkHttp client factory call</li>
+          <li>Drop-in server verifier (Node / Java / Go)</li>
+          <li>Defined degraded mode for non-GMS / offline devices</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Hidesec SDK · Executive Teaser · v1.0 · August 2026</span>
+    <span>Full reference architecture &amp; research report available on request</span>
+  </div>
+</body>
+</html>
