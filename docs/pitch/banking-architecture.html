@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile API Protection for Banking — Reference Architecture</title>
+<style>
+  :root{
+    --ink:#111827; --muted:#4b5563; --faint:#6b7280;
+    --navy:#0b2e59; --navy2:#123f77; --accent:#1f6feb;
+    --line:#e5e7eb; --soft:#f4f6f9; --softer:#fafbfc;
+    --good:#0f7a4d; --goodbg:#e7f4ee;
+    --warn:#9a5b00; --warnbg:#fbf1e0;
+    --bad:#9b1c1c; --badbg:#fbe9e9;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink); font-size:10.5pt; line-height:1.5; margin:0;
+  }
+  h1,h2,h3,h4{font-family:Georgia,"Times New Roman",serif; color:var(--navy); line-height:1.2;}
+  h2{font-size:16pt; margin:0 0 4px; padding-bottom:6px; border-bottom:2px solid var(--navy);}
+  h3{font-size:12.5pt; margin:18px 0 6px; color:var(--navy2);}
+  h4{font-size:10.5pt; margin:14px 0 4px; color:var(--navy2); font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; text-transform:uppercase; letter-spacing:.04em;}
+  p{margin:0 0 9px;}
+  a{color:var(--accent); text-decoration:none;}
+  ul{margin:0 0 9px; padding-left:18px;}
+  li{margin:0 0 4px;}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace; font-size:9pt; background:var(--soft); padding:1px 4px; border-radius:3px;}
+  .small{font-size:9pt; color:var(--faint);}
+  .section{padding:24px 30px 6px;}
+  .section.newpage{page-break-before:always;}
+
+  /* Cover */
+  .cover{
+    height:100vh; display:flex; flex-direction:column; justify-content:space-between;
+    padding:64px 56px; color:#fff;
+    background:linear-gradient(150deg,var(--navy) 0%, var(--navy2) 55%, #17518f 100%);
+    page-break-after:always;
+  }
+  .cover .brand{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; letter-spacing:.28em; font-size:10pt; text-transform:uppercase; opacity:.85;}
+  .cover h1{color:#fff; font-size:34pt; margin:0 0 14px; line-height:1.08;}
+  .cover .sub{font-size:13pt; opacity:.92; max-width:70%; line-height:1.4;}
+  .cover .tagbar{display:flex; gap:10px; margin-top:26px; flex-wrap:wrap;}
+  .cover .tag{border:1px solid rgba(255,255,255,.45); border-radius:20px; padding:5px 13px; font-size:9pt; letter-spacing:.02em;}
+  .cover .meta{font-size:9.5pt; opacity:.82; line-height:1.7;}
+  .cover .rule{height:3px; width:64px; background:#5aa0ff; margin:0 0 22px;}
+
+  /* Callouts */
+  .note{border-left:4px solid var(--accent); background:var(--softer); padding:10px 14px; margin:12px 0; border-radius:0 6px 6px 0;}
+  .note.good{border-color:var(--good); background:var(--goodbg);}
+  .note.warn{border-color:var(--warn); background:var(--warnbg);}
+  .note.bad{border-color:var(--bad); background:var(--badbg);}
+  .note .lbl{font-size:8.5pt; text-transform:uppercase; letter-spacing:.08em; font-weight:700; display:block; margin-bottom:3px;}
+  .note.good .lbl{color:var(--good);} .note.warn .lbl{color:var(--warn);} .note.bad .lbl{color:var(--bad);} .note .lbl{color:var(--accent);}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:9pt;}
+  th{background:var(--navy); color:#fff; text-align:left; padding:7px 9px; font-weight:600; font-size:8.5pt; text-transform:uppercase; letter-spacing:.03em;}
+  td{padding:7px 9px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:nth-child(even) td{background:var(--softer);}
+  .tag-yes{color:var(--good); font-weight:700;} .tag-no{color:var(--bad); font-weight:700;} .tag-part{color:var(--warn); font-weight:700;}
+
+  /* layer diagram */
+  .stack{margin:12px 0;}
+  .layer{border-radius:8px; padding:11px 14px; margin:0 0 8px; border:1px solid var(--line); position:relative;}
+  .layer .t{font-weight:700; font-size:10.5pt; color:var(--navy);}
+  .layer .d{font-size:8.8pt; color:var(--muted); margin-top:2px;}
+  .layer .role{position:absolute; right:12px; top:11px; font-size:7.5pt; text-transform:uppercase; letter-spacing:.06em; padding:2px 8px; border-radius:12px; font-weight:700;}
+  .l4{background:#eaf1fb;} .l4 .role{background:#d6e4fb; color:var(--navy2);}
+  .l3{background:#eaf4ef;} .l3 .role{background:#d3ecdd; color:var(--good);}
+  .l2{background:#eef2f7;} .l2 .role{background:#dde6f0; color:var(--navy2);}
+  .l1{background:#faf3e6;} .l1 .role{background:#f2e2c4; color:var(--warn);}
+
+  /* code block */
+  pre{background:#0d1b2e; color:#e6edf3; padding:14px 16px; border-radius:8px; font-family:"SF Mono",Menlo,Consolas,monospace; font-size:8.3pt; line-height:1.5; overflow:hidden; margin:10px 0; white-space:pre-wrap;}
+  pre .k{color:#79c0ff;} pre .s{color:#a5d6ff;} pre .c{color:#8b949e;} pre .a{color:#ffa657;}
+
+  .two{display:flex; gap:18px;}
+  .two>div{flex:1;}
+  .kicker{font-size:8.5pt; text-transform:uppercase; letter-spacing:.12em; color:var(--accent); font-weight:700; margin-bottom:2px;}
+  .foot{margin-top:20px; padding:14px 30px; border-top:1px solid var(--line); color:var(--faint); font-size:8pt;}
+  .pill{display:inline-block; background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:2px 9px; font-size:8pt; margin:2px 3px 2px 0;}
+  .metric{display:flex; gap:14px; margin:10px 0;}
+  .metric .m{flex:1; background:var(--softer); border:1px solid var(--line); border-radius:8px; padding:11px 13px;}
+  .metric .m .n{font-family:Georgia,serif; font-size:17pt; color:var(--navy); font-weight:700;}
+  .metric .m .l{font-size:8pt; color:var(--muted); margin-top:2px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <div>
+    <div class="brand">Hidesec&nbsp;SDK &nbsp;·&nbsp; Mobile Application Security</div>
+  </div>
+  <div>
+    <div class="rule"></div>
+    <h1>Mobile API Protection<br>for Banking</h1>
+    <div class="sub">A reference architecture for stopping API abuse from tampered, repackaged, and instrumented mobile clients — anchored in server-verified runtime attestation.</div>
+    <div class="tagbar">
+      <span class="tag">Runtime Attestation</span>
+      <span class="tag">Request-Bound Signing</span>
+      <span class="tag">Gradle&nbsp;+&nbsp;OkHttp SDK</span>
+      <span class="tag">OWASP&nbsp;MASVS Aligned</span>
+      <span class="tag">PSD2 · PCI</span>
+    </div>
+  </div>
+  <div class="meta">
+    Architecture &amp; Feasibility Brief &nbsp;·&nbsp; Version 1.0 &nbsp;·&nbsp; August 2026<br>
+    Prepared for enterprise &amp; banking security review
+  </div>
+</section>
+
+<!-- ============ EXEC SUMMARY ============ -->
+<section class="section">
+  <div class="kicker">Executive Summary</div>
+  <h2>What this protects — and how it stands up to a bank security review</h2>
+
+  <p>Banking apps face a specific, well-understood problem: static analysis of a shipped APK
+  (jadx, apktool, APKLeaks) reliably reveals every REST endpoint, request/response schema, header,
+  and any embedded key — even under R8/ProGuard. Dynamic analysis with Frida on a rooted device goes
+  further, reading traffic in cleartext before TLS. This is not a bug to be patched; it is a
+  structural property of the mobile platform.</p>
+
+  <div class="note bad">
+    <span class="lbl">The claim we deliberately do NOT make</span>
+    We do not sell "un-reverse-engineerable" or "invisible API" hiding. That claim is false on
+    the mobile platform and any competent bank security team will reject it. OWASP MASVS-RESILIENCE
+    states plainly that it is <em>impossible to prevent static analysis</em>, and that obfuscation
+    "must never be used as a replacement for security controls."
+  </div>
+
+  <div class="note good">
+    <span class="lbl">The claim we DO make — and can defend</span>
+    We make a leaked endpoint, key, or captured request <strong>useless to anything that is not
+    your genuine, unmodified app running on a plausibly clean device.</strong> Trust is anchored on
+    <strong>your server</strong>, not in the binary: the app proves its integrity via hardware-backed
+    attestation, receives only short-lived request-bound credentials, and your backend rejects
+    everything else. This is the same architecture banks already accept under PSD2 and PCI.
+  </div>
+
+  <div class="metric">
+    <div class="m"><div class="n">&lt;1 ms</div><div class="l">Added latency per request (signing on the hot path; attestation amortized)</div></div>
+    <div class="m"><div class="n">2 lines</div><div class="l">Developer integration: one Gradle plugin, one OkHttp client factory call</div></div>
+    <div class="m"><div class="n">Fail&nbsp;closed</div><div class="l">Security-critical calls are rejected server-side without valid attestation</div></div>
+  </div>
+
+  <p class="small">This brief is intentionally candid about limitations (page&nbsp;6). In a banking
+  procurement, that candor is a feature: it demonstrates the architecture is honest about where the
+  real control lives — on the server — which is exactly what an auditor verifies.</p>
+</section>
+
+<!-- ============ PROBLEM & POSITIONING ============ -->
+<section class="section newpage">
+  <div class="kicker">The Problem, Precisely Stated</div>
+  <h2>Two problems banks conflate — only one is solvable on the client</h2>
+
+  <table>
+    <tr><th style="width:42%">Objective</th><th style="width:13%">Solvable client-side?</th><th>Why</th></tr>
+    <tr>
+      <td><strong>Hide endpoints / keys / payloads from an attacker</strong></td>
+      <td class="tag-no">No</td>
+      <td>The app must resolve the URL and build/decrypt the payload in its own memory. An attacker who controls the device recovers both — statically from the binary, dynamically via Frida hooking the HTTP layer before TLS. Native/NDK code only raises cost by hours.</td>
+    </tr>
+    <tr>
+      <td><strong>Make a leaked endpoint/key un-usable by anything but the genuine app</strong></td>
+      <td class="tag-part">Yes (server-anchored)</td>
+      <td>Move the trust anchor to the server. Attestation proves "a genuine, unmodified app instance made this request"; the signing secret lives server-side; short-lived, request-bound credentials mean captured traffic cannot be replayed or forged at scale.</td>
+    </tr>
+  </table>
+
+  <p>The product is built entirely around the second objective. The first is addressed only as a
+  <em>friction layer</em> — worthwhile to deter commodity attackers and satisfy MASVS-RESILIENCE
+  hardening checkboxes, never presented as the security control.</p>
+
+  <h3>Why the honest framing wins the banking sale</h3>
+  <p>Bank security reviewers, PCI QSAs, and PSD2 auditors evaluate against a threat model that
+  <em>assumes</em> the client is hostile. A vendor promising client-side secrecy signals
+  inexperience and fails technical due diligence. A vendor whose architecture states "assume the API
+  is public; here is how we make abuse non-actionable and auditable" maps directly to the controls
+  those reviewers are looking for. Candor is the differentiator, not a liability.</p>
+
+  <div class="note">
+    <span class="lbl">Reference precedent</span>
+    This is the same architecture shipped commercially by Approov and used in production banking
+    apps, and the pattern Google Play Integrity and Apple App Attest are designed to feed. The
+    differentiator of this SDK is <strong>developer experience and a bundled server-side verifier</strong>,
+    not a novel secrecy claim.
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section class="section newpage">
+  <div class="kicker">Reference Architecture</div>
+  <h2>Two layers, two jobs, never confused</h2>
+
+  <div class="two">
+    <div>
+      <h4>Cryptographic / attestation layer</h4>
+      <p class="small">Server-anchored trust. The signing secret lives on the server; the backend
+      rejects any request lacking a fresh, valid, request-bound proof of app integrity.
+      <strong>This is the security control.</strong></p>
+    </div>
+    <div>
+      <h4>Obfuscation layer</h4>
+      <p class="small">Endpoint-table obfuscation, NDK constexpr-XOR strings, control-flow hardening.
+      Raises the cost of static analysis. <strong>This is friction / defense-in-depth — never the
+      control.</strong></p>
+    </div>
+  </div>
+
+  <h3>Components</h3>
+  <table>
+    <tr><th style="width:24%">Component</th><th>Responsibility</th></tr>
+    <tr><td><strong>Gradle plugin</strong><br><span class="small">build-time</span></td>
+      <td>Orchestrates the build on the AGP 8.x/9.x ASM Instrumentation API. Registers codegen and the NDK build, applies opt-in endpoint-string obfuscation per variant, and <strong>fails the build on foot-guns</strong> (hardcoded secrets, debuggable release, missing pinning, cleartext traffic).</td></tr>
+    <tr><td><strong>KSP codegen</strong><br><span class="small">compile-time</span></td>
+      <td>From an annotated Retrofit interface, generates the obfuscated endpoint table, the canonical-request serializer used for signing (method + path + sorted params + body hash + nonce), per-endpoint policy, and JWE wrappers for encrypted bodies. Zero runtime reflection.</td></tr>
+    <tr><td><strong>NDK core</strong><br><span class="small">libhidesec.so</span></td>
+      <td>Runs the challenge-response attestation handshake, requests <strong>just-in-time short-lived secrets</strong> from the server after attestation passes (nothing long-lived is embedded), computes the per-request signature, and uses Android Keystore / StrongBox for device-bound keys where available.</td></tr>
+    <tr><td><strong>OkHttp interceptor</strong><br><span class="small">runtime · dev-facing</span></td>
+      <td>Attaches the short-lived signed attestation token (60–300 s TTL) bound to the request body hash, nonce, and user session; enforces <strong>dynamic certificate pinning</strong> (OTA pin rotation, no app release); optionally JWE-encrypts bodies; <strong>fails closed</strong> on missing attestation for critical calls.</td></tr>
+    <tr><td><strong>Server-side verifier</strong><br><span class="small">the load-bearing control</span></td>
+      <td>Drop-in gateway middleware (Node/Java/Go). Verifies the token signature, freshness, anti-replay nonce, and body binding; verifies Play Integrity verdicts server-side; feeds results into <strong>risk scoring</strong> alongside authN/Z, rate limiting, and anomaly detection.</td></tr>
+  </table>
+
+  <h3>Layered defense — what each layer defeats</h3>
+  <div class="stack">
+    <div class="layer l4"><span class="role">Durable control</span>
+      <div class="t">Server enforcement</div>
+      <div class="d">AuthN/Z · short-lived revocable tokens · rate limits · anomaly detection &nbsp;→&nbsp; the policy backstop; nothing is bypassed here</div></div>
+    <div class="layer l3"><span class="role">Security control</span>
+      <div class="t">Attestation (server-verified)</div>
+      <div class="d">Play Integrity / challenge-response verdict → risk scoring &nbsp;·&nbsp; defeats repackaged apps, emulators, bots at scale &nbsp;·&nbsp; probabilistic vs. a determined bypass</div></div>
+    <div class="layer l2"><span class="role">Security control</span>
+      <div class="t">Cryptographic (client → server)</div>
+      <div class="d">Per-request signature bound to body + nonce · JIT runtime secrets · dynamic pinning &nbsp;·&nbsp; defeats forged/replayed requests &amp; passive MITM</div></div>
+    <div class="layer l1"><span class="role">Friction only</span>
+      <div class="t">Obfuscation (client)</div>
+      <div class="d">Endpoint-table obfuscation · NDK constexpr-XOR · control-flow &nbsp;·&nbsp; defeats jadx/apktool/APKLeaks &amp; scripted attackers &nbsp;·&nbsp; not a Frida attacker</div></div>
+  </div>
+</section>
+
+<!-- ============ DX + PERF ============ -->
+<section class="section newpage">
+  <div class="kicker">Developer Experience</div>
+  <h2>What the developer writes</h2>
+  <p>The entire integration is a plugin declaration and one client factory call. Attestation
+  handshakes, header injection, pinning, secret substitution, and canonicalization are handled by
+  the SDK. This DX is the core product value.</p>
+
+<pre><span class="c">// build.gradle.kts</span>
+<span class="k">plugins</span> { id(<span class="s">"io.hidesec.security"</span>) version <span class="s">"1.x"</span> }
+
+<span class="a">hidesec</span> {
+    attestationService = <span class="s">"playintegrity"</span>        <span class="c">// or "cloud"</span>
+    serverVerifierUrl  = <span class="s">"https://api.yourbank.com/attest"</span>
+    obfuscateEndpoints = <span class="k">true</span>                    <span class="c">// friction layer, opt-in</span>
+    failMode           = FailMode.CLOSED
+}
+
+<span class="c">// Retrofit interface — annotate; codegen does the rest</span>
+<span class="a">@AttestedApi</span>
+<span class="k">interface</span> AccountApi {
+    <span class="a">@POST</span>(<span class="s">"v1/transfer"</span>)
+    <span class="k">suspend fun</span> transfer(@Body req: TransferRequest): TransferResponse
+}
+
+<span class="c">// Runtime — one call; interceptor is pre-wired</span>
+<span class="k">val</span> client = Hidesec.okHttpClient()
+<span class="k">val</span> api = Retrofit.Builder().client(client) <span class="c">/* ... */</span> .create(AccountApi::<span class="k">class</span>.java)</pre>
+
+  <div class="kicker" style="margin-top:16px;">Performance</div>
+  <h2>Latency budget</h2>
+  <table>
+    <tr><th style="width:46%">Cost</th><th style="width:20%">Budget</th><th>How it is met</th></tr>
+    <tr><td>Attestation handshake (Play Integrity standard, warm)</td><td>~200–500 ms</td><td><strong>Amortized:</strong> fetched per session at startup, async; short-lived token cached. Never on the per-request path.</td></tr>
+    <tr><td>Per-request signature (software HMAC over body hash)</td><td>sub-ms</td><td>Signing key kept in software / TEE on the hot path</td></tr>
+    <tr><td>Interceptor overhead (header compute + substitution)</td><td>&lt;1 ms</td><td>—</td></tr>
+    <tr><td>Body-inclusive signature</td><td>∝ payload</td><td>Stream-hash where possible; do not buffer large uploads</td></tr>
+    <tr><td>DEX obfuscation</td><td>cold-start cost</td><td><strong>Disclosed &amp; opt-in per variant</strong> — the friction layer can be disabled where latency-sensitive</td></tr>
+  </table>
+  <div class="note warn">
+    <span class="lbl">Engineering constraint stated up front</span>
+    The "&lt;1 ms/request" figure holds only when attestation is amortized off the request path.
+    A per-request Play Integrity call costs hundreds of milliseconds and collides with the default
+    10,000-requests/day quota. The architecture mandates async token provisioning with caching — and
+    a defined degraded mode for non-GMS devices — precisely to keep this budget honest.
+  </div>
+</section>
+
+<!-- ============ LIMITATIONS ============ -->
+<section class="section newpage">
+  <div class="kicker">Honest Limitations</div>
+  <h2>What a determined attacker still gets — and why the server is load-bearing</h2>
+
+  <p>Presenting these to a bank is deliberate. Each is a known property of the platform, and the
+  architecture is designed so that none of them compromises the backend.</p>
+
+  <table>
+    <tr><th style="width:50%">A rooted-device Frida attacker can…</th><th>Mitigation / why it doesn't break the backend</th></tr>
+    <tr><td>Read every endpoint, request, and response in cleartext (hook OkHttp before TLS, or strip pinning + MITM)</td><td>Obfuscation and pinning buy time, not secrecy. The backend never relies on the request being secret — it relies on the request being <em>attested and signed</em>.</td></tr>
+    <tr><td>Recover any decrypted secret in the moment (hook the decrypt routine / Cipher)</td><td>JIT secrets are short-lived and centrally rotatable; a captured secret expires in minutes and is revocable on leak detection.</td></tr>
+    <tr><td>Drive a genuine, attested app instance to mint valid tokens (the hostile-client problem)</td><td>Body binding stops blind replay; scaled abuse is caught by rate limiting, anomaly detection, and account-level risk scoring on the server.</td></tr>
+    <tr><td>Bypass attestation itself at a cost (keybox spoofing, bypass modules)</td><td>Attestation is one weighted risk signal, not a sole gate. Cost is raised materially; residual risk is handled by backend policy.</td></tr>
+  </table>
+
+  <div class="note good">
+    <span class="lbl">The design test</span>
+    <strong>If the client SDK vanished entirely, a correctly secured backend would still be safe.</strong>
+    The SDK cuts abuse cost, blocks commodity and scaled attacks, and produces auditable integrity
+    signals — but the durable controls (authenticate and authorize every request, short-lived
+    revocable tokens, rate limiting, anomaly detection, secrets off the client) live on the server.
+    This is exactly what a PCI QSA or PSD2 auditor expects to verify.
+  </div>
+</section>
+
+<!-- ============ ENTERPRISE READINESS ============ -->
+<section class="section newpage">
+  <div class="kicker">Enterprise &amp; Banking Readiness</div>
+  <h2>Compliance and operational checklist</h2>
+
+  <div class="two">
+    <div>
+      <h4>Key &amp; secret management</h4>
+      <ul>
+        <li>No long-lived signing key in the binary — server-held, delivered JIT post-attestation</li>
+        <li>Central rotation without an app release; short validity windows; revocation on leak</li>
+        <li>Per-request nonce + server-side anti-replay cache</li>
+      </ul>
+      <h4>CI/CD &amp; supportability</h4>
+      <ul>
+        <li>Headless Gradle plugin; hardening off in debug, on in release</li>
+        <li>R8 + obfuscation mapping files archived to crash reporting for de-obfuscated stack traces</li>
+        <li>Attestation credentials in the CI secrets manager, never in source</li>
+      </ul>
+      <h4>Supply chain</h4>
+      <ul>
+        <li>Signed artifacts (Sigstore / Maven signing); published SBOM</li>
+        <li>Pinned, maintained dependencies; reproducible NDK toolchain</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Availability (design a degraded mode)</h4>
+      <ul>
+        <li>Play Integrity needs Google Play Services — define an explicit tier for non-GMS / sideloaded / offline</li>
+        <li>Plan for the 10,000/day quota; request an increase before wide rollout</li>
+        <li>Warm-up call on cold start; server-side clock-skew tolerance + retry-on-401 re-provisioning</li>
+      </ul>
+      <h4>Regulatory mapping</h4>
+      <ul>
+        <li><strong>PCI DSS / MPoC / SPoC:</strong> attestation + RASP + key protection map to software-security &amp; tamper-detection; server enforcement covers auditable controls</li>
+        <li><strong>PSD2 RTS (SCA):</strong> app hardening + attested secure channel supports transaction integrity; SCA remains a server + independent-channel control</li>
+        <li><strong>OWASP MASVS:</strong> positioned as MASVS-RESILIENCE (V8) defense-in-depth <em>on top of</em> the MASVS-L1/L2 baseline</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Buy-vs-build honesty for the prospect</h3>
+  <table>
+    <tr><th style="width:34%">If the bank…</th><th>Recommendation</th></tr>
+    <tr><td>needs the outcome now, cross-platform</td><td>The SDK, or Approov as the reference commercial equivalent; Play Integrity + App Attest if strong in-house backend capacity</td></tr>
+    <tr><td>needs certified code hardening for a checkbox</td><td>Bundle with DexGuard-class hardening — but only <em>on top of</em> this server-side core</td></tr>
+    <tr><td>wants baseline hygiene only</td><td>R8 + string obfuscation + cert pinning, with zero expectation of API secrecy</td></tr>
+  </table>
+
+  <div class="note">
+    <span class="lbl">Where this SDK's value actually is</span>
+    No existing open-source product packages endpoint obfuscation + build-time hardening + OkHttp
+    middleware + attestation + a drop-in server verifier into one integration. The differentiator is
+    <strong>developer experience and a bundled verifier</strong> — making the correct, auditable
+    architecture a two-line integration for the bank's mobile team.
+  </div>
+</section>
+
+<div class="foot">
+  Hidesec SDK · Mobile API Protection for Banking — Reference Architecture · v1.0 · August 2026 &nbsp;|&nbsp;
+  Prepared for security review. Security posture aligned to OWASP MASVS; regulatory mappings are
+  architectural guidance, not a certification. &nbsp;|&nbsp; Full research report and sources available on request.
+</div>
+
+</body>
+</html>
